@@ -1,6 +1,7 @@
 package io.casehub.neocortex.mindmap;
 
 import io.casehub.neocortex.cognitive.Confidence;
+import io.casehub.platform.api.identity.PrincipalId;
 
 import java.time.Instant;
 import java.util.Map;
@@ -19,7 +20,8 @@ public record NodeInput(
         Double arousal,
         Double dominance,
         Map<String, String> properties,
-        String principalId
+        PrincipalId principalId,
+        Set<String> sharedWith
                        ) {
 
     public NodeInput {
@@ -30,74 +32,80 @@ public record NodeInput(
         traits     = traits == null ? Set.of() : Set.copyOf(traits);
         refs       = refs == null ? Set.of() : Set.copyOf(refs);
         properties = properties == null ? Map.of() : Map.copyOf(properties);
+        sharedWith = sharedWith == null ? Set.of() : Set.copyOf(sharedWith);
     }
 
 
-    public NodeInput(String name, String subgraphId, Confidence confidence, String provenance, Set<String> traits, Set<NodeRef> refs, Instant validFrom, Instant validUntil, Double pleasure, Double arousal, Double dominance, Map<String, String> properties) {this(name, subgraphId, confidence, provenance, traits, refs, validFrom, validUntil, pleasure, arousal, dominance, properties, null);}
+    public NodeInput(String name, String subgraphId, Confidence confidence, String provenance, Set<String> traits, Set<NodeRef> refs, Instant validFrom, Instant validUntil, Double pleasure, Double arousal, Double dominance, Map<String, String> properties) {this(name, subgraphId, confidence, provenance, traits, refs, validFrom, validUntil, pleasure, arousal, dominance, properties, null, null);}
 
     public static NodeInput of(String name, String subgraphId) {
         return new NodeInput(name, subgraphId, null, null, null, null,
-                             null, null, null, null, null, null, null);
+                             null, null, null, null, null, null, null, null);
     }
 
     public NodeInput withConfidence(Confidence confidence) {
         return new NodeInput(name, subgraphId, confidence, provenance, traits, refs,
-                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId);
+                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId, sharedWith);
     }
 
     public NodeInput withProvenance(String provenance) {
         return new NodeInput(name, subgraphId, confidence, provenance, traits, refs,
-                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId);
+                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId, sharedWith);
     }
 
     public NodeInput withTraits(Set<String> traits) {
         return new NodeInput(name, subgraphId, confidence, provenance, traits, refs,
-                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId);
+                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId, sharedWith);
     }
 
     public NodeInput withRefs(Set<NodeRef> refs) {
         return new NodeInput(name, subgraphId, confidence, provenance, traits, refs,
-                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId);
+                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId, sharedWith);
     }
 
     public NodeInput withValidFrom(Instant validFrom) {
         return new NodeInput(name, subgraphId, confidence, provenance, traits, refs,
-                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId);
+                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId, sharedWith);
     }
 
     public NodeInput withValidUntil(Instant validUntil) {
         return new NodeInput(name, subgraphId, confidence, provenance, traits, refs,
-                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId);
+                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId, sharedWith);
     }
 
     public NodeInput withPleasure(Double pleasure) {
         return new NodeInput(name, subgraphId, confidence, provenance, traits, refs,
-                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId);
+                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId, sharedWith);
     }
 
     public NodeInput withArousal(Double arousal) {
         return new NodeInput(name, subgraphId, confidence, provenance, traits, refs,
-                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId);
+                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId, sharedWith);
     }
 
     public NodeInput withDominance(Double dominance) {
         return new NodeInput(name, subgraphId, confidence, provenance, traits, refs,
-                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId);
+                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId, sharedWith);
     }
 
     public NodeInput withPad(Double pleasure, Double arousal, Double dominance) {
         return new NodeInput(name, subgraphId, confidence, provenance, traits, refs,
-                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId);
+                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId, sharedWith);
     }
 
     public NodeInput withProperties(Map<String, String> properties) {
         return new NodeInput(name, subgraphId, confidence, provenance, traits, refs,
-                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId);
+                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId, sharedWith);
     }
 
-    public NodeInput withPrincipalId(String principalId) {
+    public NodeInput withPrincipalId(PrincipalId principalId) {
         return new NodeInput(name, subgraphId, confidence, provenance, traits, refs,
-                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId);
+                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId, sharedWith);
+    }
+
+    public NodeInput withSharedWith(Set<String> sharedWith) {
+        return new NodeInput(name, subgraphId, confidence, provenance, traits, refs,
+                             validFrom, validUntil, pleasure, arousal, dominance, properties, principalId, sharedWith);
     }
 
     public NodeInput withProperty(String key, String value) {

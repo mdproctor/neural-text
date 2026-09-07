@@ -1,5 +1,7 @@
 package io.casehub.neocortex.mindmap;
 
+import io.casehub.platform.api.identity.PrincipalId;
+
 import java.util.List;
 import java.util.Set;
 
@@ -38,11 +40,23 @@ public interface MindMapStore {
 
     List<MindMapNode> nodesIn(String subgraphId, String tenantId);
 
-    List<MindMapEdge> bridgeEdges(String subgraphId, String tenantId);
+    List<MindMapEdge> bridgeEdges(String subgraphId, String tenantId, PrincipalId callerPrincipal);
 
-    List<MindMapEdge> neighbors(String nodeId, String tenantId);
+    default List<MindMapEdge> bridgeEdges(String subgraphId, String tenantId) {
+        return bridgeEdges(subgraphId, tenantId, null);
+    }
 
-    List<MindMapEdge> neighbors(String nodeId, String edgeType, String tenantId);
+    List<MindMapEdge> neighbors(String nodeId, String tenantId, PrincipalId callerPrincipal);
+
+    default List<MindMapEdge> neighbors(String nodeId, String tenantId) {
+        return neighbors(nodeId, tenantId, (PrincipalId) null);
+    }
+
+    List<MindMapEdge> neighbors(String nodeId, String edgeType, String tenantId, PrincipalId callerPrincipal);
+
+    default List<MindMapEdge> neighbors(String nodeId, String edgeType, String tenantId) {
+        return neighbors(nodeId, edgeType, tenantId, null);
+    }
 
     List<MindMapNode> search(MindMapQuery query);
 

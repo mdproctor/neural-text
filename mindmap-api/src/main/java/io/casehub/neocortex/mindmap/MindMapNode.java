@@ -1,6 +1,7 @@
 package io.casehub.neocortex.mindmap;
 
 import io.casehub.neocortex.cognitive.Confidence;
+import io.casehub.platform.api.identity.PrincipalId;
 
 import java.time.Instant;
 import java.util.Map;
@@ -40,4 +41,8 @@ public interface MindMapNode {
     Optional<String> property(String key);
 
     Map<String, String> properties();
+
+    PrincipalId principalId();
+
+    Set<String> sharedWith();
 }

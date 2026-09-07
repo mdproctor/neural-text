@@ -1,6 +1,7 @@
 package io.casehub.neocortex.mindmap;
 
 import io.casehub.neocortex.cognitive.Confidence;
+import io.casehub.platform.api.identity.PrincipalId;
 
 import java.time.Instant;
 import java.util.Map;
@@ -18,7 +19,7 @@ public record EdgeInput(
         Double arousal,
         Double dominance,
         Map<String, String> properties,
-        String principalId
+        PrincipalId principalId
                        ) {
 
     public EdgeInput {
@@ -81,7 +82,7 @@ public record EdgeInput(
                              validFrom, validUntil, pleasure, arousal, dominance, properties, principalId);
     }
 
-    public EdgeInput withPrincipalId(String principalId) {
+    public EdgeInput withPrincipalId(PrincipalId principalId) {
         return new EdgeInput(sourceNodeId, targetNodeId, edgeType, confidence, provenance,
                              validFrom, validUntil, pleasure, arousal, dominance, properties, principalId);
     }
