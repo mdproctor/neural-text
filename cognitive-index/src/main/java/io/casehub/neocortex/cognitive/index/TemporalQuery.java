@@ -1,5 +1,7 @@
 package io.casehub.neocortex.cognitive.index;
 
+import io.casehub.platform.api.identity.PrincipalId;
+
 import java.time.Instant;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -27,7 +29,8 @@ public record TemporalQuery(
     int limit,
     Set<StoreKind> sources,
     Collection<String> entityIds,
-    boolean upcoming
+    boolean upcoming,
+    PrincipalId callerPrincipal
 ) {
     public enum StoreKind { MINDMAP, MEMORY, CBR }
 
@@ -46,22 +49,26 @@ public record TemporalQuery(
     }
 
     public static TemporalQuery since(Collection<String> tenantIds, Instant from, int limit) {
-        return new TemporalQuery(tenantIds, from, null, limit, EnumSet.allOf(StoreKind.class), List.of(), false);
+        return new TemporalQuery(tenantIds, from, null, limit, EnumSet.allOf(StoreKind.class), List.of(), false, null);
     }
 
     public static TemporalQuery window(Collection<String> tenantIds, Instant from, Instant to, int limit) {
-        return new TemporalQuery(tenantIds, from, to, limit, EnumSet.allOf(StoreKind.class), List.of(), false);
+        return new TemporalQuery(tenantIds, from, to, limit, EnumSet.allOf(StoreKind.class), List.of(), false, null);
     }
 
     public static TemporalQuery upcoming(Collection<String> tenantIds, Instant now, int limit) {
-        return new TemporalQuery(tenantIds, now, null, limit, EnumSet.of(StoreKind.MINDMAP), List.of(), true);
+        return new TemporalQuery(tenantIds, now, null, limit, EnumSet.of(StoreKind.MINDMAP), List.of(), true, null);
     }
 
     public TemporalQuery withSources(Set<StoreKind> sources) {
-        return new TemporalQuery(tenantIds, from, to, limit, sources, entityIds, upcoming);
+        return new TemporalQuery(tenantIds, from, to, limit, sources, entityIds, upcoming, callerPrincipal);
     }
 
     public TemporalQuery withEntityIds(Collection<String> entityIds) {
-        return new TemporalQuery(tenantIds, from, to, limit, sources, entityIds, upcoming);
+        return new TemporalQuery(tenantIds, from, to, limit, sources, entityIds, upcoming, callerPrincipal);
+    }
+
+    public TemporalQuery withCallerPrincipal(PrincipalId callerPrincipal) {
+        return new TemporalQuery(tenantIds, from, to, limit, sources, entityIds, upcoming, callerPrincipal);
     }
 }

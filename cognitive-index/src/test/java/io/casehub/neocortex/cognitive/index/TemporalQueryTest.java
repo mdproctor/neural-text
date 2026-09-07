@@ -55,7 +55,7 @@ class TemporalQueryTest {
 
     @Test
     void nullSources_defaultsToAll() {
-        var query = new TemporalQuery(List.of("t1"), HOUR_AGO, null, 10, null, List.of(), false);
+        var query = new TemporalQuery(List.of("t1"), HOUR_AGO, null, 10, null, List.of(), false, null);
         assertThat(query.sources()).isEqualTo(EnumSet.allOf(TemporalQuery.StoreKind.class));
     }
 

@@ -8,8 +8,10 @@ import io.casehub.neocortex.memory.Memory;
 import io.casehub.neocortex.memory.MemoryDomain;
 import io.casehub.neocortex.memory.MemoryInput;
 import io.casehub.neocortex.memory.MemoryQuery;
+import io.casehub.neocortex.memory.Subject;
 import io.casehub.neocortex.mindmap.NodeInput;
 import io.casehub.neocortex.mindmap.inmem.InMemoryMindMapStore;
+import io.casehub.platform.api.identity.PrincipalId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -153,6 +155,40 @@ class TemporalIndexTest {
     }
 
     @Test
+    void callerPrincipal_filtersMemoryByVisibility() {
+        PrincipalId alice = PrincipalId.agent("alice");
+        PrincipalId bob = PrincipalId.agent("bob");
+        Subject entity = Subject.of("entity", "e1");
+
+        memoryStore.store(MemoryInput.of(entity, EXPERIENCE, TENANT, "public memory"));
+        memoryStore.store(MemoryInput.of(entity, EXPERIENCE, TENANT, "alice private")
+            .withPrincipalId(alice));
+
+        var results = index.query(TemporalQuery.since(List.of(TENANT), HOUR_AGO, 100)
+            .withEntityIds(List.of("e1"))
+            .withCallerPrincipal(bob));
+
+        assertThat(results).hasSize(1);
+        assertThat(((TemporalSource.FromMemory) results.getFirst().source()).memory().text())
+            .isEqualTo("public memory");
+    }
+
+    @Test
+    void callerPrincipal_nullReturnsAll() {
+        PrincipalId alice = PrincipalId.agent("alice");
+        Subject entity = Subject.of("entity", "e1");
+
+        memoryStore.store(MemoryInput.of(entity, EXPERIENCE, TENANT, "public memory"));
+        memoryStore.store(MemoryInput.of(entity, EXPERIENCE, TENANT, "alice private")
+            .withPrincipalId(alice));
+
+        var results = index.query(TemporalQuery.since(List.of(TENANT), HOUR_AGO, 100)
+            .withEntityIds(List.of("e1")));
+
+        assertThat(results).hasSize(2);
+    }
+
+    @Test
     void missingStore_silentlySkipped() {
         var indexNoMemory = new TemporalIndex(mindMapStore, null, null);
         mindMapStore.addNode(node("node"), TENANT);
@@ -184,18 +220,24 @@ class TemporalIndexTest {
         @Override
         public String store(MemoryInput input) {
             String id = UUID.randomUUID().toString();
-            memories.add(new Memory(id, input.entityId(), input.domain(), input.tenantId(),
-                                    input.caseId(), input.text(), input.attributes(), Instant.now(), input.confidence(), null, null, null));
+            memories.add(new Memory(id, input.subject(), input.domain(), input.tenantId(),
+                                    input.caseId(), input.text(), input.attributes(), Instant.now(),
+                                    input.confidence(), null, null, null,
+                                    input.principalId(), input.sharedWith()));
             return id;
         }
 
         @Override
         public List<Memory> query(MemoryQuery query) {
             return memories.stream()
-                .filter(m -> query.entityIds().contains(m.entityId()))
+                .filter(m -> query.subjects().stream().anyMatch(s -> s.id().equals(m.subject().id())))
                 .filter(m -> m.domain().equals(query.domain()))
                 .filter(m -> m.tenantId().equals(query.tenantId()))
                 .filter(m -> query.since() == null || !m.createdAt().isBefore(query.since()))
+                .filter(m -> io.casehub.neocortex.cognitive.PrincipalVisibility.isVisible(
+                    query.callerPrincipalId() != null ? query.callerPrincipalId().value() : null,
+                    m.principalId() != null ? m.principalId().value() : null,
+                    m.sharedWith()))
                 .limit(query.limit())
                 .toList();
         }

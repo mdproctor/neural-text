@@ -82,10 +82,10 @@ public class TemporalIndex {
             MindMapQuery mmQuery;
             if (query.upcoming()) {
                 mmQuery = new MindMapQuery(tenantId, null, null, null, null,
-                    null, null, false, query.from(), query.to(), null, query.limit(), null);
+                    null, null, false, query.from(), query.to(), null, query.limit(), query.callerPrincipal());
             } else {
                 mmQuery = new MindMapQuery(tenantId, null, null, null, null,
-                    null, null, false, null, null, query.from(), query.limit(), null);
+                    null, null, false, null, null, query.from(), query.limit(), query.callerPrincipal());
             }
 
             List<MindMapNode> nodes = mindMapStore.search(mmQuery);
@@ -109,6 +109,9 @@ public class TemporalIndex {
                 .withOrder(MemoryOrder.CHRONOLOGICAL);
             if (query.from() != null) {
                 mq = mq.withSince(query.from());
+            }
+            if (query.callerPrincipal() != null) {
+                mq = mq.withCallerPrincipalId(query.callerPrincipal());
             }
 
             List<Memory> memories = memoryStore.query(mq);
