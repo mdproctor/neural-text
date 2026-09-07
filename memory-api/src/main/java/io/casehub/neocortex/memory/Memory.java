@@ -1,6 +1,7 @@
 package io.casehub.neocortex.memory;
 
 import io.casehub.neocortex.cognitive.Confidence;
+import io.casehub.platform.api.identity.PrincipalId;
 
 import java.time.Instant;
 import java.util.Map;
@@ -16,7 +17,7 @@ public record Memory(
         Map<String, String> attributes,
         Instant createdAt,
         Confidence confidence, Double pleasure, Double arousal, Double dominance,
-        String principalId,
+        PrincipalId principalId,
         Set<String> sharedWith) {
     public Memory {
         attributes = Map.copyOf(attributes);

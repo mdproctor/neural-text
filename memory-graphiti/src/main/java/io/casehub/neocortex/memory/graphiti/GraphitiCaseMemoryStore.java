@@ -149,7 +149,7 @@ public class GraphitiCaseMemoryStore implements GraphCaseMemoryStore {
             stream = stream.sorted(Comparator.<Memory, Instant>comparing(Memory::createdAt).reversed());
         }
         return stream
-            .filter(m -> PrincipalVisibility.isVisible(query.callerPrincipalId(), m.principalId(), m.sharedWith()))
+            .filter(m -> PrincipalVisibility.isVisible(query.callerPrincipalId() != null ? query.callerPrincipalId().value() : null, m.principalId() != null ? m.principalId().value() : null, m.sharedWith()))
             .limit(query.limit()).collect(Collectors.toList());
     }
 
@@ -222,7 +222,7 @@ public class GraphitiCaseMemoryStore implements GraphCaseMemoryStore {
             stream = stream.filter(m -> isValidAt(m, at));
         }
         return stream
-            .filter(m -> PrincipalVisibility.isVisible(query.callerPrincipalId(), m.principalId(), m.sharedWith()))
+            .filter(m -> PrincipalVisibility.isVisible(query.callerPrincipalId() != null ? query.callerPrincipalId().value() : null, m.principalId() != null ? m.principalId().value() : null, m.sharedWith()))
             .limit(query.limit()).collect(Collectors.toList());
     }
 

@@ -1,5 +1,7 @@
 package io.casehub.neocortex.memory;
 
+import io.casehub.platform.api.identity.PrincipalId;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
@@ -15,7 +17,7 @@ public record GraphMemoryQuery(
         Instant validAt,
         Set<String> subjectTypes,
         MemoryResultType resultType,
-        String callerPrincipalId
+        PrincipalId callerPrincipalId
 ) {
     public static final int MAX_SUBJECTS = 25;
 
@@ -104,7 +106,7 @@ public record GraphMemoryQuery(
                                     limit, since, validAt, subjectTypes, resultType, callerPrincipalId);
     }
 
-    public GraphMemoryQuery withCallerPrincipalId(final String callerPrincipalId) {
+    public GraphMemoryQuery withCallerPrincipalId(final PrincipalId callerPrincipalId) {
         return new GraphMemoryQuery(tenantId, subjects, domain, question,
                                     limit, since, validAt, subjectTypes, resultType, callerPrincipalId);
     }

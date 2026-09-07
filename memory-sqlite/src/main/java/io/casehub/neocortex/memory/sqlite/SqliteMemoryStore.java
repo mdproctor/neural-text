@@ -20,6 +20,7 @@ import io.casehub.neocortex.memory.MemoryScanRequest;
 import io.casehub.neocortex.memory.StoreAllResult;
 import io.casehub.neocortex.memory.Subject;
 import io.casehub.platform.api.identity.CurrentPrincipal;
+import io.casehub.platform.api.identity.PrincipalId;
 import io.micrometer.core.annotation.Timed;
 import io.quarkus.arc.Arc;
 import jakarta.annotation.PostConstruct;
@@ -151,7 +152,7 @@ public class SqliteMemoryStore implements CaseMemoryStore {
             if (input.arousal() != null) { ps.setDouble(11, input.arousal()); } else { ps.setNull(11, java.sql.Types.REAL); }
             if (input.dominance() != null) { ps.setDouble(12, input.dominance()); } else { ps.setNull(12, java.sql.Types.REAL); }
             ps.setString(13, input.subject().type());
-            ps.setString(14, input.principalId());
+            ps.setString(14, input.principalId() != null ? input.principalId().value() : null);
             ps.setString(15, input.sharedWith().isEmpty() ? null : toJsonArray(input.sharedWith()));
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -187,7 +188,7 @@ public class SqliteMemoryStore implements CaseMemoryStore {
                     if (input.arousal() != null) { ps.setDouble(11, input.arousal()); } else { ps.setNull(11, java.sql.Types.REAL); }
                     if (input.dominance() != null) { ps.setDouble(12, input.dominance()); } else { ps.setNull(12, java.sql.Types.REAL); }
                     ps.setString(13, input.subject().type());
-                    ps.setString(14, input.principalId());
+                    ps.setString(14, input.principalId() != null ? input.principalId().value() : null);
                     ps.setString(15, input.sharedWith().isEmpty() ? null : toJsonArray(input.sharedWith()));
                     ps.executeUpdate();
                     ids.add(memoryId);
@@ -405,7 +406,7 @@ public class SqliteMemoryStore implements CaseMemoryStore {
             ps.setString(idx++, query.domain().name());
             if (query.caseId() != null) ps.setString(idx++, query.caseId());
             if (query.since()  != null) ps.setString(idx++, query.since().truncatedTo(ChronoUnit.MILLIS).toString());
-            if (query.callerPrincipalId() != null) { ps.setString(idx++, query.callerPrincipalId()); ps.setString(idx++, query.callerPrincipalId()); }
+            if (query.callerPrincipalId() != null) { ps.setString(idx++, query.callerPrincipalId().value()); ps.setString(idx++, query.callerPrincipalId().value()); }
             ps.setInt(idx, query.limit());
 
             List<Memory> results = new ArrayList<>();
@@ -448,7 +449,7 @@ public class SqliteMemoryStore implements CaseMemoryStore {
             ps.setString(idx++, sanitised);
             if (query.caseId() != null) ps.setString(idx++, query.caseId());
             if (query.since()  != null) ps.setString(idx++, query.since().truncatedTo(ChronoUnit.MILLIS).toString());
-            if (query.callerPrincipalId() != null) { ps.setString(idx++, query.callerPrincipalId()); ps.setString(idx++, query.callerPrincipalId()); }
+            if (query.callerPrincipalId() != null) { ps.setString(idx++, query.callerPrincipalId().value()); ps.setString(idx++, query.callerPrincipalId().value()); }
             ps.setInt(idx, query.limit());
 
             List<Memory> results = new ArrayList<>();
@@ -526,7 +527,7 @@ public class SqliteMemoryStore implements CaseMemoryStore {
             rs.getObject("pleasure") != null ? rs.getDouble("pleasure") : null,
             rs.getObject("arousal") != null ? rs.getDouble("arousal") : null,
             rs.getObject("dominance") != null ? rs.getDouble("dominance") : null,
-            rs.getString("principal_id"),
+            rs.getString("principal_id") != null ? PrincipalId.parse(rs.getString("principal_id")) : null,
             parseSharedWith(rs.getString("shared_with")));
     }
 

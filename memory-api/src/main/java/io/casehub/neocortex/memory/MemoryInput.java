@@ -1,6 +1,7 @@
 package io.casehub.neocortex.memory;
 
 import io.casehub.neocortex.cognitive.Confidence;
+import io.casehub.platform.api.identity.PrincipalId;
 
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +15,7 @@ public record MemoryInput(
         String text,
         Map<String, String> attributes,
         Confidence confidence, Double pleasure, Double arousal, Double dominance,
-        String principalId,
+        PrincipalId principalId,
         Set<String> sharedWith) {
 
     public MemoryInput {
@@ -49,7 +50,7 @@ public record MemoryInput(
     }
 
     public static MemoryInput ownedBy(Subject subject, MemoryDomain domain,
-                                      String tenantId, String text, String principalId) {
+                                      String tenantId, String text, PrincipalId principalId) {
         return new MemoryInput(subject, domain, tenantId, null, text,
                                Map.of(), null, null, null, null, principalId, null);
     }
@@ -82,7 +83,7 @@ public record MemoryInput(
         return new MemoryInput(subject, domain, tenantId, caseId, text, attributes, confidence, pleasure, arousal, dominance, principalId, sharedWith);
     }
 
-    public MemoryInput withPrincipalId(String principalId) {
+    public MemoryInput withPrincipalId(PrincipalId principalId) {
         return new MemoryInput(subject, domain, tenantId, caseId, text, attributes, confidence, pleasure, arousal, dominance, principalId, sharedWith);
     }
 

@@ -77,6 +77,7 @@ public class InMemoryMemoryStore implements CaseMemoryStore {
                 input.caseId(), input.text(), input.attributes(), Instant.now(),
                 input.confidence(), input.pleasure(), input.arousal(), input.dominance(),
                 input.principalId(), input.sharedWith());
+
         store.computeIfAbsent(
                 new BucketKey(input.tenantId(), input.subject().id(), input.domain()),
                 k -> new CopyOnWriteArrayList<>()
@@ -106,7 +107,7 @@ public class InMemoryMemoryStore implements CaseMemoryStore {
                             .filter(m -> query.since() == null || !m.createdAt().isBefore(query.since()))
                             .filter(m -> query.question() == null
                                          || m.text().toLowerCase().contains(query.question().toLowerCase()))
-                            .filter(m -> PrincipalVisibility.isVisible(query.callerPrincipalId(), m.principalId(), m.sharedWith()));
+                            .filter(m -> PrincipalVisibility.isVisible(query.callerPrincipalId() != null ? query.callerPrincipalId().value() : null, m.principalId() != null ? m.principalId().value() : null, m.sharedWith()));
 
         if (query.order() == MemoryOrder.SALIENCE) {
             Instant now = Instant.now();

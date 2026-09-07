@@ -1,5 +1,7 @@
 package io.casehub.neocortex.memory;
 
+import io.casehub.platform.api.identity.PrincipalId;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
@@ -13,7 +15,7 @@ public record MemoryQuery(
         int limit,
         Instant since,
         MemoryOrder order,
-        String callerPrincipalId
+        PrincipalId callerPrincipalId
 ) {
     public static final int MAX_SUBJECTS = 25;
 
@@ -83,7 +85,7 @@ public record MemoryQuery(
         return new MemoryQuery(subjects, domain, tenantId, caseId, question, limit, since, order, callerPrincipalId);
     }
 
-    public MemoryQuery withCallerPrincipalId(String callerPrincipalId) {
+    public MemoryQuery withCallerPrincipalId(PrincipalId callerPrincipalId) {
         return new MemoryQuery(subjects, domain, tenantId, caseId, question, limit, since, order, callerPrincipalId);
     }
 }

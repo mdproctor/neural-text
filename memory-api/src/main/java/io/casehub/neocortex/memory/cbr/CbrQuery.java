@@ -2,6 +2,7 @@ package io.casehub.neocortex.memory.cbr;
 
 import io.casehub.neocortex.fusion.FusionStrategy;
 import io.casehub.neocortex.memory.MemoryDomain;
+import io.casehub.platform.api.identity.PrincipalId;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
@@ -23,7 +24,7 @@ public record CbrQuery(
         TemporalDecay temporalDecay,
         io.casehub.platform.api.path.Path scope,
         ScopeDecay scopeDecay,
-        String callerPrincipalId
+        PrincipalId callerPrincipalId
 ) {
     public CbrQuery {
         Objects.requireNonNull(tenantId, "tenantId required");
@@ -160,7 +161,7 @@ public record CbrQuery(
                             scope, scopeDecay, callerPrincipalId);
     }
 
-    public CbrQuery withCallerPrincipalId(String callerPrincipalId) {
+    public CbrQuery withCallerPrincipalId(PrincipalId callerPrincipalId) {
         return new CbrQuery(tenantId, domain, caseType, features, filters, weights, topK,
                             minSimilarity, notBefore, problem, vectorWeight, retrievalMode, fusionStrategy, temporalDecay,
                             scope, scopeDecay, callerPrincipalId);

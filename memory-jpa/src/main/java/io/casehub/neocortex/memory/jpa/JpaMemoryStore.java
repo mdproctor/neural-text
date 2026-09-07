@@ -17,6 +17,7 @@ import io.casehub.neocortex.memory.MemoryScanRequest;
 import io.casehub.neocortex.memory.StoreAllResult;
 import io.casehub.neocortex.memory.Subject;
 import io.casehub.platform.api.identity.CurrentPrincipal;
+import io.casehub.platform.api.identity.PrincipalId;
 import io.micrometer.core.annotation.Timed;
 import io.quarkus.arc.Arc;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -84,7 +85,7 @@ public class JpaMemoryStore implements CaseMemoryStore {
         entry.arousal    = input.arousal();
         entry.dominance  = input.dominance();
         entry.subjectType = input.subject().type();
-        entry.principalId = input.principalId();
+        entry.principalId = input.principalId() != null ? input.principalId().value() : null;
         entry.sharedWith  = serializeSharedWith(input.sharedWith());
 
         MemoryEntry.persist(entry);
@@ -112,7 +113,7 @@ public class JpaMemoryStore implements CaseMemoryStore {
             e.arousal    = input.arousal();
             e.dominance  = input.dominance();
             e.subjectType = input.subject().type();
-            e.principalId = input.principalId();
+            e.principalId = input.principalId() != null ? input.principalId().value() : null;
             e.sharedWith  = serializeSharedWith(input.sharedWith());
             return e;
         }).toList();
@@ -151,8 +152,8 @@ public class JpaMemoryStore implements CaseMemoryStore {
         if (query.caseId() != null) jq.setParameter("caseId", query.caseId());
         if (query.since()  != null) jq.setParameter("since",  query.since());
         if (query.callerPrincipalId() != null) {
-            jq.setParameter("callerPid", query.callerPrincipalId());
-            jq.setParameter("sharedPattern", "%\"" + query.callerPrincipalId() + "\"%");
+            jq.setParameter("callerPid", query.callerPrincipalId().value());
+            jq.setParameter("sharedPattern", "%\"" + query.callerPrincipalId().value() + "\"%");
         }
 
         return jq.getResultList().stream().map(this::toMemory).toList();
@@ -187,8 +188,8 @@ public class JpaMemoryStore implements CaseMemoryStore {
         if (query.caseId() != null) nq.setParameter("caseId", query.caseId());
         if (query.since()  != null) nq.setParameter("since",  query.since());
         if (query.callerPrincipalId() != null) {
-            nq.setParameter("callerPid", query.callerPrincipalId());
-            nq.setParameter("sharedPattern", "%\"" + query.callerPrincipalId() + "\"%");
+            nq.setParameter("callerPid", query.callerPrincipalId().value());
+            nq.setParameter("sharedPattern", "%\"" + query.callerPrincipalId().value() + "\"%");
         }
 
         return ((List<MemoryEntry>) nq.getResultList()).stream().map(this::toMemory).toList();
@@ -398,7 +399,7 @@ public class JpaMemoryStore implements CaseMemoryStore {
                 deserializeAttributes(e.attributes),
                 e.createdAt,
             e.confidence != null ? Confidence.unknown(e.confidence) : null, e.pleasure, e.arousal, e.dominance,
-                e.principalId, deserializeSharedWith(e.sharedWith));
+                e.principalId != null ? PrincipalId.parse(e.principalId) : null, deserializeSharedWith(e.sharedWith));
     }
 
     private String serializeAttributes(Map<String, String> attrs) {

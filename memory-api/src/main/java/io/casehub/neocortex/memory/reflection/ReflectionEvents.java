@@ -1,6 +1,7 @@
 package io.casehub.neocortex.memory.reflection;
 
 import io.casehub.neocortex.cognitive.Confidence;
+import io.casehub.platform.api.identity.PrincipalId;
 
 import io.casehub.neocortex.memory.MemoryDomain;
 import io.casehub.neocortex.memory.MemoryInput;
@@ -42,6 +43,6 @@ public final class ReflectionEvents {
             : Math.min(0.3 + (event.level() * 0.2), 1.0);
 
         return new MemoryInput(Subject.of("agent", event.agentId()), DOMAIN, event.tenantId(),
-                               event.caseId(), event.insight(), attrs, Confidence.unknown(confidenceValue), null, null, null, event.agentId(), null);
+                               event.caseId(), event.insight(), attrs, Confidence.unknown(confidenceValue), null, null, null, PrincipalId.agent(event.agentId()), null);
     }
 }

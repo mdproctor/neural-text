@@ -71,7 +71,7 @@ public class InMemoryCbrCaseMemoryStore implements CbrCaseMemoryStore {
     @Override
     public String store(CbrCase cbrCase, String caseType, io.casehub.neocortex.memory.Subject subject, MemoryDomain domain,
                         String tenantId, String caseId, io.casehub.platform.api.path.Path scope,
-                        String principalId, java.util.Set<String> sharedWith) {
+                        io.casehub.platform.api.identity.PrincipalId principalId, java.util.Set<String> sharedWith) {
         return store(cbrCase, caseType, subject.id(), domain, tenantId, caseId, scope);
     }
 

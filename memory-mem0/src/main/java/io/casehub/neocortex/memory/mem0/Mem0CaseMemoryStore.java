@@ -17,6 +17,7 @@ import io.casehub.neocortex.memory.mem0.dto.Mem0AddRequest;
 import io.casehub.neocortex.memory.mem0.dto.Mem0Memory;
 import io.casehub.neocortex.memory.mem0.dto.Mem0SearchRequest;
 import io.casehub.platform.api.identity.CurrentPrincipal;
+import io.casehub.platform.api.identity.PrincipalId;
 import io.micrometer.core.annotation.Timed;
 import io.quarkus.arc.Arc;
 import jakarta.annotation.Priority;
@@ -141,7 +142,7 @@ public class Mem0CaseMemoryStore implements CaseMemoryStore {
         return stream
             .limit(query.limit())
             .map(m -> toMemory(m, query.tenantId()))
-            .filter(m -> PrincipalVisibility.isVisible(query.callerPrincipalId(), m.principalId(), m.sharedWith()))
+            .filter(m -> PrincipalVisibility.isVisible(query.callerPrincipalId() != null ? query.callerPrincipalId().value() : null, m.principalId() != null ? m.principalId().value() : null, m.sharedWith()))
             .collect(Collectors.toList());
     }
 
@@ -293,13 +294,14 @@ public class Mem0CaseMemoryStore implements CaseMemoryStore {
 
     private static Map<String, String> visibilityMetadata(MemoryInput input) {
         var meta = new HashMap<>(input.attributes());
-        if (input.principalId() != null) {meta.put("_principalId", input.principalId());}
+        if (input.principalId() != null) {meta.put("_principalId", input.principalId().value());}
         if (!input.sharedWith().isEmpty()) {meta.put("_sharedWith", String.join(",", input.sharedWith()));}
         return meta;
     }
 
-    private static String extractPrincipalId(Map<String, String> metadata) {
-        return metadata != null ? metadata.get("_principalId") : null;
+    private static PrincipalId extractPrincipalId(Map<String, String> metadata) {
+        String raw = metadata != null ? metadata.get("_principalId") : null;
+        return raw != null ? PrincipalId.parse(raw) : null;
     }
 
     private static Set<String> extractSharedWith(Map<String, String> metadata) {

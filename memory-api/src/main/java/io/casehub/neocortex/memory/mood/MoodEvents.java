@@ -1,5 +1,6 @@
 package io.casehub.neocortex.memory.mood;
 
+import io.casehub.platform.api.identity.PrincipalId;
 import io.casehub.neocortex.memory.MemoryDomain;
 import io.casehub.neocortex.memory.MemoryInput;
 import io.casehub.neocortex.memory.Subject;
@@ -44,6 +45,6 @@ public final class MoodEvents {
 
         return new MemoryInput(Subject.of("agent", state.agentId()), DOMAIN, state.tenantId(),
                                null, state.cause(), attrs, null,
-                               state.pleasure(), state.arousal(), state.dominance(), state.agentId(), null);
+                               state.pleasure(), state.arousal(), state.dominance(), PrincipalId.agent(state.agentId()), null);
     }
 }
