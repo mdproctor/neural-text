@@ -10,6 +10,7 @@ import io.casehub.neocortex.mindmap.OverlayRef;
 import io.casehub.neocortex.mindmap.SubgraphInput;
 import io.casehub.neocortex.mindmap.SubgraphType;
 import io.casehub.neocortex.mindmap.inmem.InMemoryMindMapStore;
+import io.casehub.platform.api.identity.PrincipalId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -49,7 +50,7 @@ class PerspectivalResolverTest {
         addOverlay(sharedId, "alice", 0.9, 0.3, 0.5);
         MindMapNode shared = mindMapStore.getNode(sharedId, TENANT);
 
-        var result = resolver.resolve(List.of(shared), "alice", TENANT);
+        var result = resolver.resolve(List.of(shared), PrincipalId.agent("alice"), TENANT);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().name()).isEqualTo("Grandma");
@@ -63,7 +64,7 @@ class PerspectivalResolverTest {
         String      sharedId = addSharedNode("Uncle Bob");
         MindMapNode shared   = mindMapStore.getNode(sharedId, TENANT);
 
-        var result = resolver.resolve(List.of(shared), "alice", TENANT);
+        var result = resolver.resolve(List.of(shared), PrincipalId.agent("alice"), TENANT);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().name()).isEqualTo("Uncle Bob");
@@ -79,7 +80,7 @@ class PerspectivalResolverTest {
         MindMapNode grandma = mindMapStore.getNode(grandmaId, TENANT);
         MindMapNode uncle   = mindMapStore.getNode(uncleId, TENANT);
 
-        var result = resolver.resolve(List.of(grandma, uncle), "alice", TENANT);
+        var result = resolver.resolve(List.of(grandma, uncle), PrincipalId.agent("alice"), TENANT);
 
         assertThat(result).hasSize(2);
         MindMapNode resolvedGrandma = result.stream()
@@ -97,8 +98,8 @@ class PerspectivalResolverTest {
         addOverlay(sharedId, "bob", 0.1, 0.8, 0.2);
         MindMapNode shared = mindMapStore.getNode(sharedId, TENANT);
 
-        var aliceResult = resolver.resolve(List.of(shared), "alice", TENANT);
-        var bobResult   = resolver.resolve(List.of(shared), "bob", TENANT);
+        var aliceResult = resolver.resolve(List.of(shared), PrincipalId.agent("alice"), TENANT);
+        var bobResult   = resolver.resolve(List.of(shared), PrincipalId.agent("bob"), TENANT);
 
         assertThat(aliceResult.getFirst().pleasure()).isEqualTo(0.9);
         assertThat(bobResult.getFirst().pleasure()).isEqualTo(0.1);
@@ -112,7 +113,7 @@ class PerspectivalResolverTest {
                                           CONF, null, NOW, NOW, null, null,
                                           Set.of(), Set.of(), null, null, null, Map.of(), null, Set.of());
 
-        var result = noStore.resolve(List.of(shared), "alice", TENANT);
+        var result = noStore.resolve(List.of(shared), PrincipalId.agent("alice"), TENANT);
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().pleasure()).isNull();
     }
@@ -127,7 +128,7 @@ class PerspectivalResolverTest {
         MindMapNode n1 = mindMapStore.getNode(id1, TENANT);
         MindMapNode n2 = mindMapStore.getNode(id2, TENANT);
 
-        var result = resolver.resolve(List.of(n1, n2), "alice", TENANT);
+        var result = resolver.resolve(List.of(n1, n2), PrincipalId.agent("alice"), TENANT);
 
         assertThat(result).hasSize(2);
         assertThat(result).allSatisfy(n -> assertThat(n.pleasure()).isNotNull());
@@ -142,10 +143,11 @@ class PerspectivalResolverTest {
 
     private void addOverlay(String sharedNodeId, String agentId,
                             double p, double a, double d) {
+        String principalValue = PrincipalId.agent(agentId).value();
         mindMapStore.addNode(new NodeInput(
                 "overlay-" + sharedNodeId + "-" + agentId, subgraphId, null, null,
                 Set.of("overlay"), Set.of(OverlayRef.of(sharedNodeId)),
                 null, null, p, a, d,
-                Map.of(OverlayRef.AGENT_ID, agentId)), TENANT);
+                Map.of(OverlayRef.AGENT_ID, principalValue)), TENANT);
     }
 }
