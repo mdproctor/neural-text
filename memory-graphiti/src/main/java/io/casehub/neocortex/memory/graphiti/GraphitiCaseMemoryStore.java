@@ -13,7 +13,7 @@ import io.casehub.neocortex.memory.MemoryPermissions;
 import io.casehub.neocortex.memory.MemoryQuery;
 import io.casehub.neocortex.memory.StoreAllResult;
 import io.casehub.neocortex.memory.Subject;
-import io.casehub.neocortex.memory.MemoryVisibility;
+import io.casehub.neocortex.cognitive.PrincipalVisibility;
 import io.casehub.neocortex.memory.graphiti.dto.AddMessage;
 import io.casehub.neocortex.memory.graphiti.dto.AddMessagesRequest;
 import io.casehub.neocortex.memory.graphiti.dto.FactResult;
@@ -149,7 +149,7 @@ public class GraphitiCaseMemoryStore implements GraphCaseMemoryStore {
             stream = stream.sorted(Comparator.<Memory, Instant>comparing(Memory::createdAt).reversed());
         }
         return stream
-            .filter(m -> MemoryVisibility.isVisible(query.callerPrincipalId(), m))
+            .filter(m -> PrincipalVisibility.isVisible(query.callerPrincipalId(), m.principalId(), m.sharedWith()))
             .limit(query.limit()).collect(Collectors.toList());
     }
 
@@ -222,7 +222,7 @@ public class GraphitiCaseMemoryStore implements GraphCaseMemoryStore {
             stream = stream.filter(m -> isValidAt(m, at));
         }
         return stream
-            .filter(m -> MemoryVisibility.isVisible(query.callerPrincipalId(), m))
+            .filter(m -> PrincipalVisibility.isVisible(query.callerPrincipalId(), m.principalId(), m.sharedWith()))
             .limit(query.limit()).collect(Collectors.toList());
     }
 

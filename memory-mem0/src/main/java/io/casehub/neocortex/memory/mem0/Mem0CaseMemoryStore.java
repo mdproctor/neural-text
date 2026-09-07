@@ -9,7 +9,7 @@ import io.casehub.neocortex.memory.MemoryInput;
 import io.casehub.neocortex.memory.MemoryOrder;
 import io.casehub.neocortex.memory.MemoryPermissions;
 import io.casehub.neocortex.memory.MemoryQuery;
-import io.casehub.neocortex.memory.MemoryVisibility;
+import io.casehub.neocortex.cognitive.PrincipalVisibility;
 import io.casehub.neocortex.memory.StoreAllResult;
 import io.casehub.neocortex.memory.StoreFailure;
 import io.casehub.neocortex.memory.Subject;
@@ -141,7 +141,7 @@ public class Mem0CaseMemoryStore implements CaseMemoryStore {
         return stream
             .limit(query.limit())
             .map(m -> toMemory(m, query.tenantId()))
-            .filter(m -> MemoryVisibility.isVisible(query.callerPrincipalId(), m))
+            .filter(m -> PrincipalVisibility.isVisible(query.callerPrincipalId(), m.principalId(), m.sharedWith()))
             .collect(Collectors.toList());
     }
 
