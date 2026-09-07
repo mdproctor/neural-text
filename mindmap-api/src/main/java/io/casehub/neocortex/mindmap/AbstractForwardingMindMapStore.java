@@ -1,5 +1,7 @@
 package io.casehub.neocortex.mindmap;
 
+import io.casehub.platform.api.identity.PrincipalId;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -32,9 +34,9 @@ public abstract class AbstractForwardingMindMapStore implements MindMapStore {
     @Override public void updateSubgraph(String subgraphId, String rootNodeId, String tenantId) { delegate.updateSubgraph(subgraphId, rootNodeId, tenantId); }
     @Override public List<MindMapSubgraph> listSubgraphs(String tenantId) { return delegate.listSubgraphs(tenantId); }
     @Override public List<MindMapNode> nodesIn(String subgraphId, String tenantId) { return delegate.nodesIn(subgraphId, tenantId); }
-    @Override public List<MindMapEdge> bridgeEdges(String subgraphId, String tenantId) { return delegate.bridgeEdges(subgraphId, tenantId); }
-    @Override public List<MindMapEdge> neighbors(String nodeId, String tenantId) { return delegate.neighbors(nodeId, tenantId); }
-    @Override public List<MindMapEdge> neighbors(String nodeId, String edgeType, String tenantId) { return delegate.neighbors(nodeId, edgeType, tenantId); }
+    @Override public List<MindMapEdge> bridgeEdges(String subgraphId, String tenantId, PrincipalId callerPrincipal) { return delegate.bridgeEdges(subgraphId, tenantId, callerPrincipal); }
+    @Override public List<MindMapEdge> neighbors(String nodeId, String tenantId, PrincipalId callerPrincipal) { return delegate.neighbors(nodeId, tenantId, callerPrincipal); }
+    @Override public List<MindMapEdge> neighbors(String nodeId, String edgeType, String tenantId, PrincipalId callerPrincipal) { return delegate.neighbors(nodeId, edgeType, tenantId, callerPrincipal); }
     @Override public List<MindMapNode> search(MindMapQuery query) { return delegate.search(query); }
     @Override public void supersede(String targetId, String supersedingId, String reason, String tenantId) { delegate.supersede(targetId, supersedingId, reason, tenantId); }
     @Override public void reinstate(String targetId, String tenantId) { delegate.reinstate(targetId, tenantId); }

@@ -7,6 +7,7 @@ import io.casehub.neocortex.mindmap.MindMapEdge;
 import io.casehub.neocortex.mindmap.MindMapNode;
 import io.casehub.neocortex.mindmap.MindMapStore;
 import io.casehub.neocortex.mindmap.NodeInput;
+import io.casehub.platform.api.identity.PrincipalId;
 import io.casehub.neocortex.mindmap.NodeUpdate;
 import io.casehub.neocortex.mindmap.TraitRule;
 import jakarta.annotation.Priority;
@@ -53,11 +54,11 @@ public class TraitApplicationDecorator extends AbstractForwardingMindMapStore {
         this.registry          = registry;
     }
 
-    private List<TraitRule> resolveRules(String principalId) {
+    private List<TraitRule> resolveRules(PrincipalId principal) {
         if (registry == null) {return programmaticRules;}
         List<TraitRule> resolved = new ArrayList<>(programmaticRules);
-        if (principalId != null) {
-            resolved.addAll(registry.traitRules(principalId));
+        if (principal != null) {
+            resolved.addAll(registry.traitRules(principal.id()));
         } else {
             resolved.addAll(registry.allTraitRules());
         }
@@ -125,8 +126,8 @@ public class TraitApplicationDecorator extends AbstractForwardingMindMapStore {
         }
     }
 
-    private void evaluateTraitsForNode(String nodeId, String tenantId, String principalId) {
-        List<TraitRule> rules = resolveRules(principalId);
+    private void evaluateTraitsForNode(String nodeId, String tenantId, PrincipalId principal) {
+        List<TraitRule> rules = resolveRules(principal);
         if (rules.isEmpty()) {return;}
 
         MindMapNode node = delegate().getNode(nodeId, tenantId);

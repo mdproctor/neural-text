@@ -7,6 +7,8 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.casehub.neocortex.cognitive.Confidence;
 import io.casehub.neocortex.cognitive.ConfidenceOrigin;
+import io.casehub.neocortex.cognitive.PrincipalVisibility;
+import io.casehub.platform.api.identity.PrincipalId;
 import io.casehub.neocortex.mindmap.EdgeInput;
 import io.casehub.neocortex.mindmap.MindMapConfidenceDefaults;
 import io.casehub.neocortex.mindmap.EdgeTypeDefinition;
@@ -241,7 +243,7 @@ public class SqliteMindMapStore implements MindMapStore {
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(
-                 "INSERT INTO mindmap_node (node_id, tenant_id, name, subgraph_id, confidence_origin, confidence_value, provenance, created_at, updated_at, decay_reference, valid_from, valid_until, traits, refs, pleasure, arousal, dominance, properties) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")) {
+                 "INSERT INTO mindmap_node (node_id, tenant_id, name, subgraph_id, confidence_origin, confidence_value, provenance, created_at, updated_at, decay_reference, valid_from, valid_until, traits, refs, pleasure, arousal, dominance, properties, principal_id, shared_with) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")) {
             String nowTs = ts(now);
             ps.setString(1, id);
             ps.setString(2, tenantId);
@@ -261,6 +263,8 @@ public class SqliteMindMapStore implements MindMapStore {
             setNullableDouble(ps, 16, input.arousal());
             setNullableDouble(ps, 17, input.dominance());
             ps.setString(18, mapToJson(input.properties()));
+            ps.setString(19, input.principalId() != null ? input.principalId().value() : null);
+            ps.setString(20, input.sharedWith().isEmpty() ? null : String.join(",", input.sharedWith()));
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new IllegalStateException("addNode() failed", e);
@@ -516,22 +520,31 @@ public class SqliteMindMapStore implements MindMapStore {
 
     // --- Traversal ---
 
+    private boolean isNodeVisible(String nodeId, String tenantId, PrincipalId callerPrincipal) {
+        if (callerPrincipal == null) return true;
+        MindMapNode node = getNode(nodeId, tenantId);
+        if (node == null) return false;
+        return PrincipalVisibility.isVisible(callerPrincipal.value(), node.principalId() != null ? node.principalId().value() : null, node.sharedWith());
+    }
+
     @Override
-    public List<MindMapEdge> neighbors(String nodeId, String tenantId) {
+    public List<MindMapEdge> neighbors(String nodeId, String tenantId, PrincipalId callerPrincipal) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(
                  "SELECT * FROM mindmap_edge WHERE tenant_id = ? AND (source_node_id = ? OR target_node_id = ?)")) {
             ps.setString(1, tenantId);
             ps.setString(2, nodeId);
             ps.setString(3, nodeId);
-            return collectEdges(ps);
+            List<MindMapEdge> edges = collectEdges(ps);
+            if (callerPrincipal == null) return edges;
+            return edges.stream().filter(e -> isNodeVisible(e.sourceNodeId(), tenantId, callerPrincipal) && isNodeVisible(e.targetNodeId(), tenantId, callerPrincipal)).toList();
         } catch (SQLException e) {
             throw new IllegalStateException("neighbors() failed", e);
         }
     }
 
     @Override
-    public List<MindMapEdge> neighbors(String nodeId, String edgeType, String tenantId) {
+    public List<MindMapEdge> neighbors(String nodeId, String edgeType, String tenantId, PrincipalId callerPrincipal) {
         String resolved = canonicalEdgeTypes.getOrDefault(edgeType, edgeType);
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(
@@ -540,14 +553,16 @@ public class SqliteMindMapStore implements MindMapStore {
             ps.setString(2, nodeId);
             ps.setString(3, nodeId);
             ps.setString(4, resolved);
-            return collectEdges(ps);
+            List<MindMapEdge> edges = collectEdges(ps);
+            if (callerPrincipal == null) return edges;
+            return edges.stream().filter(e -> isNodeVisible(e.sourceNodeId(), tenantId, callerPrincipal) && isNodeVisible(e.targetNodeId(), tenantId, callerPrincipal)).toList();
         } catch (SQLException e) {
             throw new IllegalStateException("neighbors(edgeType) failed", e);
         }
     }
 
     @Override
-    public List<MindMapEdge> bridgeEdges(String subgraphId, String tenantId) {
+    public List<MindMapEdge> bridgeEdges(String subgraphId, String tenantId, PrincipalId callerPrincipal) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(
                  "SELECT e.* FROM mindmap_edge e WHERE e.tenant_id = ? AND (" +
@@ -562,7 +577,9 @@ public class SqliteMindMapStore implements MindMapStore {
             ps.setString(7, subgraphId);
             ps.setString(8, tenantId);
             ps.setString(9, subgraphId);
-            return collectEdges(ps);
+            List<MindMapEdge> edges = collectEdges(ps);
+            if (callerPrincipal == null) return edges;
+            return edges.stream().filter(edge -> isNodeVisible(edge.sourceNodeId(), tenantId, callerPrincipal) && isNodeVisible(edge.targetNodeId(), tenantId, callerPrincipal)).toList();
         } catch (SQLException e) {
             throw new IllegalStateException("bridgeEdges() failed", e);
         }
@@ -617,6 +634,12 @@ public class SqliteMindMapStore implements MindMapStore {
         if (query.updatedAfter() != null) {
             sql.append(" AND n.updated_at IS NOT NULL AND n.updated_at > ?");
             params.add(query.updatedAfter().toString());
+        }
+        if (query.callerPrincipal() != null) {
+            String caller = query.callerPrincipal().value();
+            sql.append(" AND (n.principal_id IS NULL OR n.principal_id = ? OR (n.shared_with IS NOT NULL AND (',' || n.shared_with || ',') LIKE ?))");
+            params.add(caller);
+            params.add("%," + caller + ",%");
         }
 
         sql.append(" LIMIT ?");
@@ -1018,7 +1041,9 @@ public class SqliteMindMapStore implements MindMapStore {
             getNullableDouble(rs, "pleasure"),
             getNullableDouble(rs, "arousal"),
             getNullableDouble(rs, "dominance"),
-            mapFromJson(rs.getString("properties")));
+            mapFromJson(rs.getString("properties")),
+            rs.getString("principal_id") != null ? PrincipalId.parse(rs.getString("principal_id")) : null,
+            rs.getString("shared_with") != null ? Set.of(rs.getString("shared_with").split(",")) : Set.of());
     }
 
     private MindMapEdge toEdge(ResultSet rs) throws SQLException {
@@ -1085,7 +1110,8 @@ public class SqliteMindMapStore implements MindMapStore {
         Instant validFrom, Instant validUntil,
         Set<String> traits, Set<NodeRef> refs,
         Double pleasure, Double arousal, Double dominance,
-        Map<String, String> props
+        Map<String, String> props,
+        PrincipalId principalId, Set<String> sharedWith
     ) implements MindMapNode {
         @Override public Set<String> traits() { return Set.copyOf(traits); }
         @Override public Set<NodeRef> refs() { return Set.copyOf(refs); }

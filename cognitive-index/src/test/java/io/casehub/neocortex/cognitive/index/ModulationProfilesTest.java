@@ -37,7 +37,7 @@ class ModulationProfilesTest {
             "n1", "Test", "sg-1",
             new Confidence(ConfidenceOrigin.STATED, 0.8, NOW),
             null, NOW, NOW, null, null,
-            Set.of(), Set.of(), 0.4, -0.2, 0.6, Map.of());
+            Set.of(), Set.of(), 0.4, -0.2, 0.6, Map.of(), null, Set.of());
         assertThat(profile.confidence().apply(node).value()).isEqualTo(0.8);
         assertThat(profile.pleasure().apply(node)).isEqualTo(0.4);
         assertThat(profile.arousal().apply(node)).isEqualTo(-0.2);

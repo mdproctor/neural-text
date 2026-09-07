@@ -1,6 +1,7 @@
 package io.casehub.neocortex.mindmap;
 
 import io.casehub.neocortex.cognitive.Confidence;
+import io.casehub.platform.api.identity.PrincipalId;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
@@ -24,4 +25,6 @@ record TestNode(Map<String, String> props) implements MindMapNode {
     public Double dominance() { return null; }
     public Optional<String> property(String key) { return Optional.ofNullable(props.get(key)); }
     public Map<String, String> properties() { return props; }
+    public PrincipalId principalId() { return null; }
+    public Set<String> sharedWith() { return Set.of(); }
 }

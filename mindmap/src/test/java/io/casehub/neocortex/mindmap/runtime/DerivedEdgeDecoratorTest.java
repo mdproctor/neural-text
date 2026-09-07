@@ -308,7 +308,7 @@ class DerivedEdgeDecoratorTest {
         String alice = scopedDecorator.addNode(node("Alice"), "t1");
         String bob   = scopedDecorator.addNode(node("Bob"), "t1");
 
-        scopedDecorator.addEdge(edge(alice, bob, "has-child").withPrincipalId("agent-1"), "t1");
+        scopedDecorator.addEdge(edge(alice, bob, "has-child").withPrincipalId(io.casehub.platform.api.identity.PrincipalId.agent("agent-1")), "t1");
 
         List<MindMapEdge> derived = scopedDecorator.neighbors(bob, "parent-of", "t1");
         assertThat(derived).hasSize(1);
@@ -331,7 +331,7 @@ class DerivedEdgeDecoratorTest {
         String alice = scopedDecorator.addNode(node("Alice"), "t1");
         String bob   = scopedDecorator.addNode(node("Bob"), "t1");
 
-        scopedDecorator.addEdge(edge(alice, bob, "has-child").withPrincipalId("agent-2"), "t1");
+        scopedDecorator.addEdge(edge(alice, bob, "has-child").withPrincipalId(io.casehub.platform.api.identity.PrincipalId.agent("agent-2")), "t1");
 
         List<MindMapEdge> derived = scopedDecorator.neighbors(bob, "parent-of", "t1");
         assertThat(derived).isEmpty();

@@ -7,6 +7,7 @@ import io.casehub.neocortex.mindmap.MindMapNode;
 import io.casehub.neocortex.mindmap.MindMapQuery;
 import io.casehub.neocortex.mindmap.MindMapStore;
 import io.casehub.neocortex.mindmap.NodeRef;
+import io.casehub.platform.api.identity.PrincipalId;
 import io.casehub.neocortex.mindmap.ValidationTier;
 
 import java.time.Duration;
@@ -144,6 +145,12 @@ public class ConfidenceDecayDecorator extends AbstractForwardingMindMapStore {
 
         @Override
         public Map<String, String> properties()      {return delegate.properties();}
+
+        @Override
+        public PrincipalId principalId()             {return delegate.principalId();}
+
+        @Override
+        public Set<String> sharedWith()              {return delegate.sharedWith();}
     }
 
     private record DecayedEdge(MindMapEdge delegate, Confidence decayedConfidence) implements MindMapEdge {

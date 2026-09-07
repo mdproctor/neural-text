@@ -3,6 +3,7 @@ package io.casehub.neocortex.cognitive.index;
 import io.casehub.neocortex.cognitive.Confidence;
 import io.casehub.neocortex.mindmap.MindMapNode;
 import io.casehub.neocortex.mindmap.NodeRef;
+import io.casehub.platform.api.identity.PrincipalId;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -30,7 +31,8 @@ public final class PerspectivalMerge {
             shared.validFrom(), shared.validUntil(),
             shared.traits(), shared.refs(),
             pleasure, arousal, dominance,
-            Map.copyOf(mergedProps)
+            Map.copyOf(mergedProps),
+            shared.principalId(), shared.sharedWith()
         );
     }
 
@@ -41,7 +43,8 @@ public final class PerspectivalMerge {
         Instant validFrom, Instant validUntil,
         Set<String> traits, Set<NodeRef> refs,
         Double pleasure, Double arousal, Double dominance,
-        Map<String, String> props
+        Map<String, String> props,
+        PrincipalId principalId, Set<String> sharedWith
     ) implements MindMapNode {
         @Override
         public Optional<String> property(String key) {

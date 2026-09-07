@@ -19,6 +19,7 @@ import io.casehub.neocortex.mindmap.SubgraphType;
 import io.casehub.neocortex.mindmap.SupersessionStatus;
 import io.casehub.neocortex.mindmap.ValidationTier;
 import io.casehub.neocortex.mindmap.VocabularyConflictException;
+import io.casehub.platform.api.identity.PrincipalId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -512,7 +513,7 @@ public abstract class MindMapStoreContractTest {
         store.addNode(nodeInput("Alice"), TENANT);
         store.addNode(nodeInput("Bob"), TENANT);
         var results = store.search(new MindMapQuery(TENANT, null, "Ali",
-                                                    null, null, null, null, false, null, null, null, 10));
+                                                    null, null, null, null, false, null, null, null, 10, null));
         assertThat(results).hasSize(1);
         assertThat(results.getFirst().name()).isEqualTo("Alice");
     }
@@ -525,7 +526,7 @@ public abstract class MindMapStoreContractTest {
         store.addNode(nodeInput("Bob"), TENANT);
 
         var results = store.search(new MindMapQuery(TENANT, sg1, null,
-                                                    null, null, null, null, false, null, null, null, 10));
+                                                    null, null, null, null, false, null, null, null, 10, null));
         assertThat(results).hasSize(1);
     }
 
@@ -538,7 +539,7 @@ public abstract class MindMapStoreContractTest {
         store.addNode(nodeInput("Acme"), TENANT);
 
         var results = store.search(new MindMapQuery(TENANT, null, null,
-                                                    null, Set.of("Personable"), null, null, false, null, null, null, 10));
+                                                    null, Set.of("Personable"), null, null, false, null, null, null, 10, null));
         assertThat(results).hasSize(1);
         assertThat(results.getFirst().name()).isEqualTo("Alice");
     }
@@ -551,7 +552,7 @@ public abstract class MindMapStoreContractTest {
         store.addEdge(edgeInput(alice, acme, "works-at"), TENANT);
 
         var results = store.search(new MindMapQuery(TENANT, null, null,
-                                                    "works-at", null, null, null, false, null, null, null, 10));
+                                                    "works-at", null, null, null, false, null, null, null, 10, null));
         assertThat(results).hasSize(2);
     }
 
@@ -563,7 +564,7 @@ public abstract class MindMapStoreContractTest {
             Confidence.speculated(0.3, Instant.now()), "test", null, null, null, null, null, null, null, null), TENANT);
 
         var results = store.search(new MindMapQuery(TENANT, null, null,
-                                                    null, null, 0.5, null, false, null, null, null, 10));
+                                                    null, null, 0.5, null, false, null, null, null, 10, null));
         assertThat(results).hasSize(1);
         assertThat(results.getFirst().name()).isEqualTo("Alice");
     }
@@ -576,7 +577,7 @@ public abstract class MindMapStoreContractTest {
             Confidence.inferred(0.7, Instant.now()), "test", null, null, null, null, null, null, null, null), TENANT);
 
         var results = store.search(new MindMapQuery(TENANT, null, null,
-                                                    null, null, null, ConfidenceOrigin.INFERRED, false, null, null, null, 10));
+                                                    null, null, null, ConfidenceOrigin.INFERRED, false, null, null, null, 10, null));
         assertThat(results).hasSize(1);
         assertThat(results.getFirst().name()).isEqualTo("Bob");
     }
@@ -588,7 +589,7 @@ public abstract class MindMapStoreContractTest {
         store.supersede(alice, bob, "merged", TENANT);
 
         var results = store.search(new MindMapQuery(TENANT, null, null,
-                                                    null, null, null, null, false, null, null, null, 10));
+                                                    null, null, null, null, false, null, null, null, 10, null));
         assertThat(results).noneMatch(n -> n.id().equals(alice));
     }
 
@@ -599,7 +600,7 @@ public abstract class MindMapStoreContractTest {
         store.supersede(alice, bob, "merged", TENANT);
 
         var results = store.search(new MindMapQuery(TENANT, null, null,
-                                                    null, null, null, null, true, null, null, null, 10));
+                                                    null, null, null, null, true, null, null, null, 10, null));
         assertThat(results).anyMatch(n -> n.id().equals(alice));
     }
 
@@ -607,7 +608,7 @@ public abstract class MindMapStoreContractTest {
     void search_respectsLimit() {
         for (int i = 0; i < 5; i++) store.addNode(nodeInput("Node" + i), TENANT);
         var results = store.search(new MindMapQuery(TENANT, null, null,
-                                                    null, null, null, null, false, null, null, null, 3));
+                                                    null, null, null, null, false, null, null, null, 3, null));
         assertThat(results).hasSize(3);
     }
 
@@ -624,7 +625,7 @@ public abstract class MindMapStoreContractTest {
 
         var results = store.search(new MindMapQuery(TENANT, null, null,
                                                     null, null, null, null, false,
-                                                    Instant.parse("2026-01-01T00:00:00Z"), null, null, 10));
+                                                    Instant.parse("2026-01-01T00:00:00Z"), null, null, 10, null));
         assertThat(results).hasSize(1);
         assertThat(results.getFirst().name()).isEqualTo("FutureNode");
     }
@@ -640,7 +641,7 @@ public abstract class MindMapStoreContractTest {
 
         var results = store.search(new MindMapQuery(TENANT, null, null,
                                                     null, null, null, null, false,
-                                                    null, Instant.parse("2026-01-01T00:00:00Z"), null, 10));
+                                                    null, Instant.parse("2026-01-01T00:00:00Z"), null, 10, null));
         assertThat(results).hasSize(1);
         assertThat(results.getFirst().name()).isEqualTo("PastNode");
     }
@@ -653,7 +654,7 @@ public abstract class MindMapStoreContractTest {
 
         var results = store.search(new MindMapQuery(TENANT, null, null,
                                                     null, null, null, null, false,
-                                                    null, null, cutoff, 10));
+                                                    null, null, cutoff, 10, null));
         assertThat(results).hasSize(1);
         assertThat(results.getFirst().name()).isEqualTo("NewNode");
     }
@@ -670,7 +671,7 @@ public abstract class MindMapStoreContractTest {
         var results = store.search(new MindMapQuery(TENANT, null, null,
                                                     null, null, null, null, false,
                                                     Instant.parse("2026-01-01T00:00:00Z"),
-                                                    Instant.parse("2027-01-01T00:00:00Z"), null, 10));
+                                                    Instant.parse("2027-01-01T00:00:00Z"), null, 10, null));
         assertThat(results).hasSize(1);
         assertThat(results.getFirst().name()).isEqualTo("Middle");
     }
@@ -683,7 +684,7 @@ public abstract class MindMapStoreContractTest {
                                     null, "test", null, null, null, null, null, null, null, null), TENANT);
 
         var results = store.search(new MindMapQuery(TENANT, null, null,
-                                                    null, null, null, null, false, null, null, null, 10));
+                                                    null, null, null, null, false, null, null, null, 10, null));
         assertThat(results).hasSize(2);
     }
 
@@ -913,5 +914,65 @@ public abstract class MindMapStoreContractTest {
     @Test
     void requireCapability_supportedDoesNotThrow() {
         store.requireCapability(MindMapCapability.TRAVERSAL);
+    }
+
+    // --- Principal visibility contract tests ---
+
+    @Test
+    void search_callerPrincipal_filtersPrivateNodes() {
+        PrincipalId alice = PrincipalId.agent("alice");
+        PrincipalId bob = PrincipalId.agent("bob");
+
+        store.addNode(nodeInput("public-node"), TENANT);
+        store.addNode(nodeInput("alice-private").withPrincipalId(alice), TENANT);
+
+        var results = store.search(MindMapQuery.of(TENANT, 100).withCallerPrincipal(bob));
+        assertThat(results).extracting(MindMapNode::name).containsExactly("public-node");
+    }
+
+    @Test
+    void search_callerPrincipal_ownerSeesOwnNodes() {
+        PrincipalId alice = PrincipalId.agent("alice");
+
+        store.addNode(nodeInput("alice-private").withPrincipalId(alice), TENANT);
+
+        var results = store.search(MindMapQuery.of(TENANT, 100).withCallerPrincipal(alice));
+        assertThat(results).extracting(MindMapNode::name).containsExactly("alice-private");
+    }
+
+    @Test
+    void search_callerPrincipal_sharedWithGrantsAccess() {
+        PrincipalId alice = PrincipalId.agent("alice");
+        PrincipalId bob = PrincipalId.agent("bob");
+
+        store.addNode(nodeInput("shared-node").withPrincipalId(alice)
+            .withSharedWith(Set.of(bob.value())), TENANT);
+
+        var results = store.search(MindMapQuery.of(TENANT, 100).withCallerPrincipal(bob));
+        assertThat(results).extracting(MindMapNode::name).containsExactly("shared-node");
+    }
+
+    @Test
+    void search_nullCallerPrincipal_returnsEverything() {
+        PrincipalId alice = PrincipalId.agent("alice");
+
+        store.addNode(nodeInput("public-node"), TENANT);
+        store.addNode(nodeInput("alice-private").withPrincipalId(alice), TENANT);
+
+        var results = store.search(MindMapQuery.of(TENANT, 100));
+        assertThat(results).hasSize(2);
+    }
+
+    @Test
+    void principalId_and_sharedWith_roundTrip() {
+        PrincipalId alice = PrincipalId.agent("alice");
+        Set<String> shared = Set.of("agent:bob", "agent:carol");
+
+        String nodeId = store.addNode(nodeInput("node").withPrincipalId(alice)
+            .withSharedWith(shared), TENANT);
+
+        MindMapNode node = store.getNode(nodeId, TENANT);
+        assertThat(node.principalId()).isEqualTo(alice);
+        assertThat(node.sharedWith()).containsExactlyInAnyOrderElementsOf(shared);
     }
 }

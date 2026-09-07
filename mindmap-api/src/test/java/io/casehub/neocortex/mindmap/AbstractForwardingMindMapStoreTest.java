@@ -29,9 +29,9 @@ class AbstractForwardingMindMapStoreTest {
             @Override public void updateSubgraph(String id, String r, String t) { calls.add("updateSubgraph"); }
             @Override public List<MindMapSubgraph> listSubgraphs(String t) { calls.add("listSubgraphs"); return List.of(); }
             @Override public List<MindMapNode> nodesIn(String s, String t) { calls.add("nodesIn"); return List.of(); }
-            @Override public List<MindMapEdge> bridgeEdges(String s, String t) { calls.add("bridgeEdges"); return List.of(); }
-            @Override public List<MindMapEdge> neighbors(String id, String t) { calls.add("neighbors"); return List.of(); }
-            @Override public List<MindMapEdge> neighbors(String id, String e, String t) { calls.add("neighborsTyped"); return List.of(); }
+            @Override public List<MindMapEdge> bridgeEdges(String s, String t, io.casehub.platform.api.identity.PrincipalId p) { calls.add("bridgeEdges"); return List.of(); }
+            @Override public List<MindMapEdge> neighbors(String id, String t, io.casehub.platform.api.identity.PrincipalId p) { calls.add("neighbors"); return List.of(); }
+            @Override public List<MindMapEdge> neighbors(String id, String e, String t, io.casehub.platform.api.identity.PrincipalId p) { calls.add("neighborsTyped"); return List.of(); }
             @Override public List<MindMapNode> search(MindMapQuery q) { calls.add("search"); return List.of(); }
             @Override public void supersede(String t, String s, String r, String tid) { calls.add("supersede"); }
             @Override public void reinstate(String id, String t) { calls.add("reinstate"); }
@@ -137,13 +137,13 @@ class AbstractForwardingMindMapStoreTest {
             public List<MindMapNode> nodesIn(String s, String t)                 {return List.of();}
 
             @Override
-            public List<MindMapEdge> bridgeEdges(String s, String t)             {return List.of();}
+            public List<MindMapEdge> bridgeEdges(String s, String t, io.casehub.platform.api.identity.PrincipalId p) {return List.of();}
 
             @Override
-            public List<MindMapEdge> neighbors(String id, String t)              {return List.of();}
+            public List<MindMapEdge> neighbors(String id, String t, io.casehub.platform.api.identity.PrincipalId p) {return List.of();}
 
             @Override
-            public List<MindMapEdge> neighbors(String id, String e, String t)    {return List.of();}
+            public List<MindMapEdge> neighbors(String id, String e, String t, io.casehub.platform.api.identity.PrincipalId p) {return List.of();}
 
             @Override
             public List<MindMapNode> search(MindMapQuery q)                      {return List.of();}

@@ -64,13 +64,13 @@ class ModulationIntegrationTest {
             "n1", "Aligned", "sg-1",
             new Confidence(ConfidenceOrigin.STATED, 0.9, NOW),
             null, NOW.minus(1, ChronoUnit.HOURS), NOW, null, null,
-            Set.of(), Set.of(), 0.5, 0.5, 0.5, Map.of());
+            Set.of(), Set.of(), 0.5, 0.5, 0.5, Map.of(), null, Set.of());
 
         MindMapNode misaligned = new StubNode(
             "n2", "Misaligned", "sg-1",
             new Confidence(ConfidenceOrigin.STATED, 0.3, NOW),
             null, NOW.minus(48, ChronoUnit.HOURS), NOW, null, null,
-            Set.of(), Set.of(), -0.5, -0.5, -0.5, Map.of());
+            Set.of(), Set.of(), -0.5, -0.5, -0.5, Map.of(), null, Set.of());
 
         List<ModulationFactor<MindMapNode>> factors = List.of(
             ModulationFactors.recencyDecay(Duration.ofDays(7), NOW),

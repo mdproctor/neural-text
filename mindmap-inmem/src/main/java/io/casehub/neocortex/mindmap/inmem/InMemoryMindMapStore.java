@@ -2,6 +2,8 @@ package io.casehub.neocortex.mindmap.inmem;
 
 import io.casehub.neocortex.cognitive.Confidence;
 import io.casehub.neocortex.cognitive.ConfidenceOrigin;
+import io.casehub.neocortex.cognitive.PrincipalVisibility;
+import io.casehub.platform.api.identity.PrincipalId;
 import io.casehub.neocortex.mindmap.EdgeInput;
 import io.casehub.neocortex.mindmap.EdgeTypeDefinition;
 import io.casehub.neocortex.mindmap.MergeConflict;
@@ -103,6 +105,7 @@ public class InMemoryMindMapStore implements MindMapStore {
                                          new HashSet<>(input.traits()), new HashSet<>(input.refs()),
                                          input.pleasure(), input.arousal(), input.dominance(),
                                          new HashMap<>(input.properties()), tenantId,
+                                         input.principalId(), input.sharedWith(),
                                          null, null, null, null);
         nodes.put(id, node);
         return id;}
@@ -259,28 +262,37 @@ public class InMemoryMindMapStore implements MindMapStore {
 
     // --- Traversal (Batch 3) ---
 
+    private boolean isNodeVisible(String nodeId, String tenantId, PrincipalId callerPrincipal) {
+        if (callerPrincipal == null) return true;
+        StoredNode node = nodes.get(nodeId);
+        if (node == null || !node.tenantId.equals(tenantId)) return false;
+        return PrincipalVisibility.isVisible(callerPrincipal.value(), node.principalId != null ? node.principalId.value() : null, node.sharedWith);
+    }
+
     @Override
-    public List<MindMapEdge> neighbors(String nodeId, String tenantId) {
+    public List<MindMapEdge> neighbors(String nodeId, String tenantId, PrincipalId callerPrincipal) {
         return edges.values().stream()
             .filter(e -> e.tenantId.equals(tenantId))
             .filter(e -> e.sourceNodeId.equals(nodeId) || e.targetNodeId.equals(nodeId))
+            .filter(e -> isNodeVisible(e.sourceNodeId, tenantId, callerPrincipal) && isNodeVisible(e.targetNodeId, tenantId, callerPrincipal))
             .map(e -> (MindMapEdge) e)
             .toList();
     }
 
     @Override
-    public List<MindMapEdge> neighbors(String nodeId, String edgeType, String tenantId) {
+    public List<MindMapEdge> neighbors(String nodeId, String edgeType, String tenantId, PrincipalId callerPrincipal) {
         String resolved = canonicalEdgeTypes.getOrDefault(edgeType, edgeType);
         return edges.values().stream()
             .filter(e -> e.tenantId.equals(tenantId))
             .filter(e -> e.sourceNodeId.equals(nodeId) || e.targetNodeId.equals(nodeId))
             .filter(e -> e.edgeType.equals(resolved))
+            .filter(e -> isNodeVisible(e.sourceNodeId, tenantId, callerPrincipal) && isNodeVisible(e.targetNodeId, tenantId, callerPrincipal))
             .map(e -> (MindMapEdge) e)
             .toList();
     }
 
     @Override
-    public List<MindMapEdge> bridgeEdges(String subgraphId, String tenantId) {
+    public List<MindMapEdge> bridgeEdges(String subgraphId, String tenantId, PrincipalId callerPrincipal) {
         Set<String> nodesInSg = new HashSet<>();
         nodes.values().stream()
             .filter(n -> n.tenantId.equals(tenantId) && n.subgraphId.equals(subgraphId))
@@ -293,6 +305,7 @@ public class InMemoryMindMapStore implements MindMapStore {
                 boolean tgtIn = nodesInSg.contains(e.targetNodeId);
                 return (srcIn && !tgtIn) || (!srcIn && tgtIn);
             })
+            .filter(e -> isNodeVisible(e.sourceNodeId, tenantId, callerPrincipal) && isNodeVisible(e.targetNodeId, tenantId, callerPrincipal))
             .map(e -> (MindMapEdge) e)
             .toList();
     }
@@ -324,6 +337,7 @@ public class InMemoryMindMapStore implements MindMapStore {
             .filter(n -> query.validAfter() == null || (n.validFrom != null && n.validFrom.isAfter(query.validAfter())))
             .filter(n -> query.validBefore() == null || (n.validFrom != null && n.validFrom.isBefore(query.validBefore())))
             .filter(n -> query.updatedAfter() == null || (n.updatedAt != null && n.updatedAt.isAfter(query.updatedAfter())))
+            .filter(n -> query.callerPrincipal() == null || PrincipalVisibility.isVisible(query.callerPrincipal().value(), n.principalId != null ? n.principalId.value() : null, n.sharedWith))
             .limit(query.limit())
             .map(n -> (MindMapNode) n)
             .toList();
@@ -570,6 +584,8 @@ public class InMemoryMindMapStore implements MindMapStore {
         Double dominance;
         final Map<String, String> properties;
         final String              tenantId;
+        final PrincipalId         principalId;
+        final Set<String>         sharedWith;
         Instant supersededAt;
         String  supersedingId;
         String  supersessionReason;
@@ -582,6 +598,7 @@ public class InMemoryMindMapStore implements MindMapStore {
                    Set<String> traits, Set<NodeRef> refs,
                    Double pleasure, Double arousal, Double dominance,
                    Map<String, String> properties, String tenantId,
+                   PrincipalId principalId, Set<String> sharedWith,
                    Instant supersededAt, String supersedingId,
                    String supersessionReason, Instant reinstatedAt) {
             this.id                 = id;
@@ -600,6 +617,8 @@ public class InMemoryMindMapStore implements MindMapStore {
             this.dominance          = dominance;
             this.properties         = properties;
             this.tenantId           = tenantId;
+            this.principalId        = principalId;
+            this.sharedWith         = sharedWith != null ? Set.copyOf(sharedWith) : Set.of();
             this.supersededAt       = supersededAt;
             this.supersedingId      = supersedingId;
             this.supersessionReason = supersessionReason;
@@ -661,6 +680,12 @@ public class InMemoryMindMapStore implements MindMapStore {
         public Map<String, String> properties() {
             return Map.copyOf(properties);
         }
+
+        @Override
+        public PrincipalId principalId() {return principalId;}
+
+        @Override
+        public Set<String> sharedWith() {return sharedWith;}
     }
 
     static class StoredEdge implements MindMapEdge {

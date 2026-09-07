@@ -13,6 +13,7 @@ import io.casehub.neocortex.mindmap.NodeInput;
 import io.casehub.neocortex.mindmap.NodeUpdate;
 import io.casehub.neocortex.mindmap.SubgraphInput;
 import io.casehub.neocortex.mindmap.SupersessionStatus;
+import io.casehub.platform.api.identity.PrincipalId;
 import io.quarkus.arc.DefaultBean;
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -93,17 +94,17 @@ public class NoOpMindMapStore implements MindMapStore {
     }
 
     @Override
-    public List<MindMapEdge> bridgeEdges(String subgraphId, String tenantId) {
+    public List<MindMapEdge> bridgeEdges(String subgraphId, String tenantId, PrincipalId callerPrincipal) {
         return List.of();
     }
 
     @Override
-    public List<MindMapEdge> neighbors(String nodeId, String tenantId) {
+    public List<MindMapEdge> neighbors(String nodeId, String tenantId, PrincipalId callerPrincipal) {
         return List.of();
     }
 
     @Override
-    public List<MindMapEdge> neighbors(String nodeId, String edgeType, String tenantId) {
+    public List<MindMapEdge> neighbors(String nodeId, String edgeType, String tenantId, PrincipalId callerPrincipal) {
         return List.of();
     }
 

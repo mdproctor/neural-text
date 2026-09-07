@@ -167,6 +167,8 @@ class TemporalFocusTest {
             @Override public Double dominance() { return null; }
             @Override public Optional<String> property(String key) { return Optional.empty(); }
             @Override public Map<String, String> properties() { return Map.of(); }
+            @Override public io.casehub.platform.api.identity.PrincipalId principalId() { return null; }
+            @Override public Set<String> sharedWith() { return Set.of(); }
         };
     }
 

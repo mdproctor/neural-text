@@ -57,6 +57,8 @@ class OverlayRefTest {
             public Double dominance() { return null; }
             public java.util.Optional<String> property(String key) { return java.util.Optional.empty(); }
             public java.util.Map<String, String> properties() { return java.util.Map.of(); }
+            public io.casehub.platform.api.identity.PrincipalId principalId() { return null; }
+            public Set<String> sharedWith() { return Set.of(); }
         };
     }
 }

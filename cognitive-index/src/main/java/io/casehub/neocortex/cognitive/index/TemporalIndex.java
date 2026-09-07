@@ -82,10 +82,10 @@ public class TemporalIndex {
             MindMapQuery mmQuery;
             if (query.upcoming()) {
                 mmQuery = new MindMapQuery(tenantId, null, null, null, null,
-                    null, null, false, query.from(), query.to(), null, query.limit());
+                    null, null, false, query.from(), query.to(), null, query.limit(), null);
             } else {
                 mmQuery = new MindMapQuery(tenantId, null, null, null, null,
-                    null, null, false, null, null, query.from(), query.limit());
+                    null, null, false, null, null, query.from(), query.limit(), null);
             }
 
             List<MindMapNode> nodes = mindMapStore.search(mmQuery);

@@ -13,7 +13,7 @@ class StubMindMapStore implements MindMapStore {
     }
 
     @Override
-    public List<MindMapEdge> neighbors(String nodeId, String tenantId) {
+    public List<MindMapEdge> neighbors(String nodeId, String tenantId, io.casehub.platform.api.identity.PrincipalId callerPrincipal) {
         return neighborsByNode.getOrDefault(nodeId, List.of());
     }
 
@@ -36,8 +36,8 @@ class StubMindMapStore implements MindMapStore {
     public void updateSubgraph(String subgraphId, String rootNodeId, String tenantId) { throw new UnsupportedOperationException(); }
     public List<MindMapSubgraph> listSubgraphs(String tenantId) { throw new UnsupportedOperationException(); }
     public List<MindMapNode> nodesIn(String subgraphId, String tenantId) { throw new UnsupportedOperationException(); }
-    public List<MindMapEdge> bridgeEdges(String subgraphId, String tenantId) { throw new UnsupportedOperationException(); }
-    public List<MindMapEdge> neighbors(String nodeId, String edgeType, String tenantId) { throw new UnsupportedOperationException(); }
+    public List<MindMapEdge> bridgeEdges(String subgraphId, String tenantId, io.casehub.platform.api.identity.PrincipalId p) { throw new UnsupportedOperationException(); }
+    public List<MindMapEdge> neighbors(String nodeId, String edgeType, String tenantId, io.casehub.platform.api.identity.PrincipalId p) { throw new UnsupportedOperationException(); }
     public List<MindMapNode> search(MindMapQuery query) { throw new UnsupportedOperationException(); }
     public void supersede(String targetId, String supersedingId, String reason, String tenantId) { throw new UnsupportedOperationException(); }
     public void reinstate(String targetId, String tenantId) { throw new UnsupportedOperationException(); }

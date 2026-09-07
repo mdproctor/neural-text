@@ -110,7 +110,7 @@ class PerspectivalResolverTest {
                 (MindMapStore) null);
         MindMapNode shared = new StubNode("s1", "Test", "sg1",
                                           CONF, null, NOW, NOW, null, null,
-                                          Set.of(), Set.of(), null, null, null, Map.of());
+                                          Set.of(), Set.of(), null, null, null, Map.of(), null, Set.of());
 
         var result = noStore.resolve(List.of(shared), "alice", TENANT);
         assertThat(result).hasSize(1);

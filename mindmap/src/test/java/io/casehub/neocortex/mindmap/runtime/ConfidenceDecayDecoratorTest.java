@@ -58,7 +58,7 @@ class ConfidenceDecayDecoratorTest {
             null, null, null, null, null, null, null, null), "t1");
 
         var results = decorator.search(new MindMapQuery("t1", null, null,
-                                                        null, null, 0.4, null, false, null, null, null, 10));
+                                                        null, null, 0.4, null, false, null, null, null, 10, null));
 
         assertThat(results).anyMatch(n -> n.name().equals("Fresh"));
         assertThat(results).noneMatch(n -> n.name().equals("Stale"));

@@ -76,7 +76,7 @@ class PerspectivalMergeTest {
             "shared-1", "Grandma", "sg-family",
             SHARED_CONF, null, NOW, NOW, null, null,
             Set.of("Personable"), Set.of(), null, null, null,
-            Map.of("birthday", "1945-03-12"));
+            Map.of("birthday", "1945-03-12"), null, Set.of());
         MindMapNode overlay = overlayNode(0.9, 0.3, 0.5, null, Map.of("notes", "love her"));
 
         MindMapNode merged = PerspectivalMerge.merge(shared, overlay);
@@ -92,7 +92,7 @@ class PerspectivalMergeTest {
             Confidence conf, Map<String, String> props) {
         return new StubNode("shared-1", "Grandma", "sg-family",
             conf, null, NOW, NOW, null, null,
-            Set.of("Personable"), Set.of(), p, a, d, props);
+            Set.of("Personable"), Set.of(), p, a, d, props, null, Set.of());
     }
 
     private MindMapNode overlayNode(Double p, Double a, Double d,
@@ -100,6 +100,6 @@ class PerspectivalMergeTest {
         return new StubNode("overlay-1", "Grandma", "sg-overlays",
             conf, null, NOW, NOW, null, null,
             Set.of("overlay"), Set.of(OverlayRef.of("shared-1")),
-            p, a, d, props);
+            p, a, d, props, null, Set.of());
     }
 }

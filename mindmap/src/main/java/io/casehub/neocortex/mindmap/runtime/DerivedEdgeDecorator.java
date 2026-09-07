@@ -7,6 +7,7 @@ import io.casehub.neocortex.mindmap.EdgeInput;
 import io.casehub.neocortex.mindmap.MindMapEdge;
 import io.casehub.neocortex.mindmap.MindMapNode;
 import io.casehub.neocortex.mindmap.MindMapStore;
+import io.casehub.platform.api.identity.PrincipalId;
 import jakarta.decorator.Delegate;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -54,11 +55,11 @@ public class DerivedEdgeDecorator extends AbstractForwardingMindMapStore {
         this.registry          = registry;
     }
 
-    private List<DerivedEdgeRule> resolveRules(String principalId) {
+    private List<DerivedEdgeRule> resolveRules(PrincipalId principal) {
         if (registry == null) {return programmaticRules;}
         List<DerivedEdgeRule> resolved = new ArrayList<>(programmaticRules);
-        if (principalId != null) {
-            resolved.addAll(registry.derivedEdgeRules(principalId));
+        if (principal != null) {
+            resolved.addAll(registry.derivedEdgeRules(principal.id()));
         } else {
             resolved.addAll(registry.allDerivedEdgeRules());
         }

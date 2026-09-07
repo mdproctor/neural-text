@@ -4,6 +4,7 @@ import io.casehub.neocortex.cognitive.Confidence;
 import io.casehub.neocortex.cognitive.ConfidenceOrigin;
 import io.casehub.neocortex.mindmap.MindMapNode;
 import io.casehub.neocortex.mindmap.NodeRef;
+import io.casehub.platform.api.identity.PrincipalId;
 
 import java.time.Instant;
 import java.util.Map;
@@ -17,7 +18,8 @@ record StubNode(
     Instant validFrom, Instant validUntil,
     Set<String> traits, Set<NodeRef> refs,
     Double pleasure, Double arousal, Double dominance,
-    Map<String, String> properties
+    Map<String, String> properties,
+    PrincipalId principalId, Set<String> sharedWith
 ) implements MindMapNode {
 
     static StubNode named(String name) {
@@ -25,7 +27,7 @@ record StubNode(
             "id-" + name.toLowerCase(), name, "sg-1",
             new Confidence(ConfidenceOrigin.STATED, 0.9, Instant.now()),
             null, Instant.now(), Instant.now(), null, null,
-            Set.of(), Set.of(), null, null, null, Map.of());
+            Set.of(), Set.of(), null, null, null, Map.of(), null, Set.of());
     }
 
     static StubNode withRefs(String name, Set<NodeRef> refs) {
@@ -33,7 +35,7 @@ record StubNode(
             "id-" + name.toLowerCase(), name, "sg-1",
             new Confidence(ConfidenceOrigin.STATED, 0.9, Instant.now()),
             null, Instant.now(), Instant.now(), null, null,
-            Set.of(), refs, null, null, null, Map.of());
+            Set.of(), refs, null, null, null, Map.of(), null, Set.of());
     }
 
     @Override
